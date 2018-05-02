@@ -1,0 +1,17 @@
+clusters:
+  # TODO: Handle Multi Clusters
+  - name: cluster1
+    nodes:
+      - name: primary
+        url: http://localhost:9090
+      - name: archive
+        url: http://localhost:9091
+    rules:
+      - target: primary
+        default: true
+      # TODO: Implement range
+      - target: archive
+        range: 1d
+      # TODO: Implement start
+      - target: archive
+        start: 1d
