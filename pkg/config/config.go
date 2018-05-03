@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/kobtea/iapetus/pkg/model"
 	"gopkg.in/yaml.v2"
 )
 
@@ -20,10 +21,10 @@ type Node struct {
 }
 
 type Rule struct {
-	Target  string `yaml:"target"`
-	Default bool   `yaml:"default"`
-	Range   string `yaml:"range"`
-	Start   string `yaml:"start"`
+	Target  string                 `yaml:"target"`
+	Default bool                   `yaml:"default"`
+	Range   model.DurationCriteria `yaml:"range"`
+	Start   string                 `yaml:"start"`
 }
 
 func Parse(buf []byte) (*Config, error) {

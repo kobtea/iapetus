@@ -9,9 +9,8 @@ clusters:
     rules:
       - target: primary
         default: true
-      # TODO: Implement range
       - target: archive
-        range: 1d
+        range: "> 1d"
       # TODO: Implement start
       - target: archive
-        start: 1d
+        start: "< now-1d"

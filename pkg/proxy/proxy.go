@@ -14,16 +14,22 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 	var err error
 	director := func(request *http.Request) {
 		reqUrl := *request.URL
-		target := d.FindNode()
-		targetUrl, e := url.Parse(target.Url)
+		in, e := dispatcher.NewInput(request)
 		if e != nil {
 			err = e
+			return
 		}
-		reqUrl.Scheme = targetUrl.Scheme
+		node := d.FindNode(in)
+		nodeUrl, e := url.Parse(node.Url)
+		if e != nil {
+			err = e
+			return
+		}
+		reqUrl.Scheme = nodeUrl.Scheme
 		if len(reqUrl.Scheme) == 0 {
 			reqUrl.Scheme = "http"
 		}
-		reqUrl.Host = targetUrl.Host
+		reqUrl.Host = nodeUrl.Host
 		req, e := http.NewRequest(request.Method, reqUrl.String(), request.Body)
 		err = e
 		req.Header = request.Header
