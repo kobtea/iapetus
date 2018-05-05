@@ -6,27 +6,7 @@ import (
 )
 
 type Config struct {
-	Clusters []Cluster `yaml:"clusters"`
-}
-
-type Cluster struct {
-	Name  string `yaml:"name"`
-	Nodes []Node `yaml:"nodes"`
-	Rules []Rule `yaml:"rules"`
-}
-
-type Node struct {
-	Name string `yaml:"name"`
-	Url  string `yaml:"url"`
-}
-
-type Rule struct {
-	Target  string                 `yaml:"target"`
-	Default bool                   `yaml:"default"`
-	Range   model.DurationCriteria `yaml:"range"`
-	Time    model.TimeCriteria     `yaml:"time"`
-	Start   model.TimeCriteria     `yaml:"start"`
-	End     model.TimeCriteria     `yaml:"end"`
+	Clusters []model.Cluster `yaml:"clusters"`
 }
 
 func Parse(buf []byte) (*Config, error) {

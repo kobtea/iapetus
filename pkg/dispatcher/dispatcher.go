@@ -1,7 +1,7 @@
 package dispatcher
 
 import (
-	"github.com/kobtea/iapetus/pkg/config"
+	"github.com/kobtea/iapetus/pkg/model"
 	"github.com/kobtea/iapetus/pkg/util"
 	"net/http"
 	"time"
@@ -43,17 +43,17 @@ func NewInput(r *http.Request) (Input, error) {
 	return in, nil
 }
 
-func NewDispatcher(cluster config.Cluster) *Dispatcher {
+func NewDispatcher(cluster model.Cluster) *Dispatcher {
 	return &Dispatcher{
 		Cluster: cluster,
 	}
 }
 
 type Dispatcher struct {
-	Cluster config.Cluster
+	Cluster model.Cluster
 }
 
-func (d Dispatcher) resolveNode(name string) *config.Node {
+func (d Dispatcher) resolveNode(name string) *model.Node {
 	for _, n := range d.Cluster.Nodes {
 		if n.Name == name {
 			return &n
@@ -62,7 +62,7 @@ func (d Dispatcher) resolveNode(name string) *config.Node {
 	return nil
 }
 
-func (d Dispatcher) FindNode(in Input) *config.Node {
+func (d Dispatcher) FindNode(in Input) *model.Node {
 	for _, rule := range d.Cluster.Rules {
 		if !rule.Range.IsZero() {
 			if !in.start.IsZero() || !in.end.IsZero() {
@@ -96,7 +96,7 @@ func (d Dispatcher) FindNode(in Input) *config.Node {
 	return d.defaultNode()
 }
 
-func (d Dispatcher) defaultNode() *config.Node {
+func (d Dispatcher) defaultNode() *model.Node {
 	for _, r := range d.Cluster.Rules {
 		if r.Default {
 			return d.resolveNode(r.Target)
