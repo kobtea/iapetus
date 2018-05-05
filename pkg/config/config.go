@@ -24,7 +24,9 @@ type Rule struct {
 	Target  string                 `yaml:"target"`
 	Default bool                   `yaml:"default"`
 	Range   model.DurationCriteria `yaml:"range"`
-	Start   string                 `yaml:"start"`
+	Time    model.TimeCriteria     `yaml:"time"`
+	Start   model.TimeCriteria     `yaml:"start"`
+	End     model.TimeCriteria     `yaml:"end"`
 }
 
 func Parse(buf []byte) (*Config, error) {

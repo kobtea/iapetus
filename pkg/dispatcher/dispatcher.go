@@ -71,6 +71,27 @@ func (d Dispatcher) FindNode(in Input) *config.Node {
 				}
 			}
 		}
+		if !rule.Time.IsZero() {
+			if !in.time.IsZero() {
+				if rule.Time.Satisfy(in.time) {
+					return d.resolveNode(rule.Target)
+				}
+			}
+		}
+		if !rule.Start.IsZero() {
+			if !in.start.IsZero() {
+				if rule.Start.Satisfy(in.start) {
+					return d.resolveNode(rule.Target)
+				}
+			}
+		}
+		if !rule.End.IsZero() {
+			if !in.end.IsZero() {
+				if rule.End.Satisfy(in.end) {
+					return d.resolveNode(rule.Target)
+				}
+			}
+		}
 	}
 	return d.defaultNode()
 }
