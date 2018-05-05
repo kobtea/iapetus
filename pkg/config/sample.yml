@@ -11,6 +11,5 @@ clusters:
         default: true
       - target: archive
         range: "> 1d"
-      # TODO: Implement start
       - target: archive
         start: "< now-1d"
