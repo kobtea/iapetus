@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/prometheus/common/model"
 	"gopkg.in/yaml.v2"
 	"strconv"
 	"testing"
@@ -141,7 +140,7 @@ func TestNewDurationCriteria(t *testing.T) {
 		},
 		{
 			"< 1d",
-			DurationCriteria{"<", model.Duration(24 * time.Hour)},
+			DurationCriteria{"<", 24 * time.Hour},
 			false,
 		},
 	}
@@ -166,7 +165,7 @@ func TestDurationCriteria_IsZero(t *testing.T) {
 			true,
 		},
 		{
-			DurationCriteria{">", model.Duration(time.Hour)},
+			DurationCriteria{">", time.Hour},
 			false,
 		},
 	}
@@ -200,7 +199,7 @@ func TestDurationCriteria_Satisfy(t *testing.T) {
 		},
 	}
 
-	dc := DurationCriteria{">", model.Duration(10 * time.Hour)}
+	dc := DurationCriteria{">", 10 * time.Hour}
 	for _, test := range tests {
 		if dc.Satisfy(test.start, test.end) != test.v {
 			t.Errorf("expect %v, but don't", test.v)
@@ -221,7 +220,7 @@ func TestDurationCriteria_UnmarshalYAML(t *testing.T) {
 		},
 		{
 			"> 1d",
-			DurationCriteria{">", model.Duration(24 * time.Hour)},
+			DurationCriteria{">", 24 * time.Hour},
 			false,
 		},
 	}

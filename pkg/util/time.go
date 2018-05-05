@@ -15,11 +15,11 @@ package util
 
 import (
 	"fmt"
+	"github.com/prometheus/common/model"
 	"math"
 	"strconv"
-	"time"
 	"strings"
-	"github.com/prometheus/common/model"
+	"time"
 )
 
 func ParseTime(s string) (time.Time, error) {

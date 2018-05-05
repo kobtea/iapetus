@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"github.com/kobtea/iapetus/pkg/util"
-	"github.com/prometheus/common/model"
 	"strings"
 	"time"
 )
@@ -64,7 +63,7 @@ func (t *TimeCriteria) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type DurationCriteria struct {
 	Op       string
-	Duration model.Duration
+	Duration time.Duration
 }
 
 func NewDurationCriteria(s string) (DurationCriteria, error) {
@@ -73,7 +72,7 @@ func NewDurationCriteria(s string) (DurationCriteria, error) {
 		return DurationCriteria{}, fmt.Errorf("invalid duration criteria: expects `<op> <duration>`")
 	}
 	// check operand
-	d, err := model.ParseDuration(elms[1])
+	d, err := util.ParseDuration(elms[1])
 	if err != nil {
 		return DurationCriteria{}, fmt.Errorf("invalid duration criteria: %s", elms[1])
 	}
@@ -91,7 +90,7 @@ func (d *DurationCriteria) IsZero() bool {
 }
 
 func (d *DurationCriteria) Satisfy(start, end time.Time) bool {
-	sub := model.Duration(end.Sub(start))
+	sub := end.Sub(start)
 	switch d.Op {
 	case "<":
 		return sub < d.Duration
