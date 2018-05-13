@@ -8,7 +8,7 @@ import (
 )
 
 type Input struct {
-	query string
+	Query string
 	time  time.Time
 	start time.Time
 	end   time.Time
@@ -17,7 +17,7 @@ type Input struct {
 func NewInput(r *http.Request) (Input, error) {
 	var in Input
 	if v := r.FormValue("query"); v != "" {
-		in.query = v
+		in.Query = v
 	}
 	if v := r.FormValue("time"); v != "" {
 		t, err := util.ParseTime(v)

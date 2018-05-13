@@ -3,6 +3,7 @@ package proxy
 import (
 	"github.com/kobtea/iapetus/pkg/config"
 	"github.com/kobtea/iapetus/pkg/dispatcher"
+	"github.com/kobtea/iapetus/pkg/relabel"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -20,6 +21,19 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 			return
 		}
 		node := d.FindNode(in)
+
+		// update query
+		in.Query, err = relabel.Process(in.Query, node.Relabels)
+		if e != nil {
+			err = e
+			return
+		}
+		if in.Query != request.FormValue("query") {
+			q := reqUrl.Query()
+			q.Set("query", in.Query)
+			reqUrl.RawQuery = q.Encode()
+		}
+
 		nodeUrl, e := url.Parse(node.Url)
 		if e != nil {
 			err = e

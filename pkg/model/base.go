@@ -1,5 +1,7 @@
 package model
 
+import pc "github.com/prometheus/prometheus/config"
+
 type Cluster struct {
 	Name  string `yaml:"name"`
 	Nodes []Node `yaml:"nodes"`
@@ -7,8 +9,9 @@ type Cluster struct {
 }
 
 type Node struct {
-	Name string `yaml:"name"`
-	Url  string `yaml:"url"`
+	Name     string              `yaml:"name"`
+	Url      string              `yaml:"url"`
+	Relabels []*pc.RelabelConfig `yaml:"relabels"`
 }
 
 type Rule struct {

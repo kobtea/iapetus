@@ -79,6 +79,12 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
+  name = "github.com/cespare/xxhash"
+  packages = ["."]
+  revision = "5c37fe3735342a2e0d01c87a907579987c8936cc"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -288,6 +294,33 @@
   revision = "cc309e4a22231782e8893f3c35ced0967807a33e"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/nightlyone/lockfile"
+  packages = ["."]
+  revision = "6a197d5ea61168f2ac821de2b7f011b250904900"
+
+[[projects]]
+  name = "github.com/oklog/ulid"
+  packages = ["."]
+  revision = "d311cb43c92434ec4072dfbbda3400741d0a6337"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/opentracing/opentracing-go"
+  packages = [
+    ".",
+    "log"
+  ]
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/prometheus/client_golang"
   packages = ["prometheus"]
   revision = "c5b7fccd204277076155f10851dad72b76a49317"
@@ -337,13 +370,36 @@
     "discovery/targetgroup",
     "discovery/triton",
     "discovery/zookeeper",
+    "pkg/labels",
+    "pkg/textparse",
+    "pkg/timestamp",
+    "pkg/value",
+    "promql",
+    "relabel",
+    "storage",
+    "storage/tsdb",
     "util/httputil",
+    "util/stats",
     "util/strutil",
+    "util/testutil",
     "util/treecache",
     "util/yaml"
   ]
   revision = "bc6058c81272a8d938c05e75607371284236aadc"
   version = "v2.2.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/tsdb"
+  packages = [
+    ".",
+    "chunkenc",
+    "chunks",
+    "fileutil",
+    "index",
+    "labels"
+  ]
+  revision = "f5a7e4338428e7f450520e5d8b2b1fe54ee36fba"
 
 [[projects]]
   branch = "master"
@@ -402,6 +458,12 @@
     "jwt"
   ]
   revision = "cdc340f7c179dbbfa4afd43b7614e8fcadde4269"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["errgroup"]
+  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
   branch = "master"
@@ -609,6 +671,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "375418914a68d5d6b9175d11e5dde4469ea897263e1962c1919ea0c1f03eac13"
+  inputs-digest = "e37c8b65ff4eae9d220c58dd027ac709a7273544f9f91d77d4de38180ce34679"
   solver-name = "gps-cdcl"
   solver-version = 1
