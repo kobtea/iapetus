@@ -1,0 +1,60 @@
+# Gopkg.toml example
+#
+# Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#   name = "github.com/x/y"
+#   version = "2.4.0"
+#
+# [prune]
+#   non-go = false
+#   go-tests = true
+#   unused-packages = true
+
+# https://github.com/golang/dep/issues/1799
+required = ["gopkg.in/fsnotify.v1"]
+
+[[constraint]]
+  name = "gopkg.in/fsnotify.v1"
+  source = "https://github.com/fsnotify/fsnotify.git"
+
+[[constraint]]
+  name = "github.com/prometheus/common"
+  revision = "89604d197083d4781071d3c65855d24ecfb0a563"
+
+[[constraint]]
+  name = "github.com/prometheus/prometheus"
+  version = "v2.2.1"
+
+[[override]]
+  name = "github.com/Azure/azure-sdk-for-go"
+  revision = "bd73d950fa4440dae889bd9917bff7cef539f86e"
+
+[[override]]
+  name = "github.com/Azure/go-autorest"
+  revision = "8a25372bbfec739b8719a9e3987400d15ef9e179"
+
+[[override]]
+  name = "k8s.io/client-go"
+  branch = "release-3.0"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  revision = "9603df80256c35a1dd4bc3037ed9690737af941b"
+
+[prune]
+  go-tests = true
+  unused-packages = true
