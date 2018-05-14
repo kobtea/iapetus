@@ -12,6 +12,7 @@ import (
 var (
 	configFile = kingpin.Flag("config", "iapetus config file path.").Required().String()
 	addr       = kingpin.Flag("addr", "address to listen.").Default(":19090").String()
+	logLevel   = kingpin.Flag("log.level", "log level (debug, info, warn, error)").String()
 )
 
 func main() {
@@ -27,6 +28,11 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 		return
+	}
+
+	// override log level
+	if len(*logLevel) > 0 {
+		c.Log.Level = *logLevel
 	}
 
 	handler, err := proxy.NewProxyHandler(*c)

@@ -1,15 +1,18 @@
 package proxy
 
 import (
+	"github.com/go-kit/kit/log/level"
 	"github.com/kobtea/iapetus/pkg/config"
 	"github.com/kobtea/iapetus/pkg/dispatcher"
 	"github.com/kobtea/iapetus/pkg/relabel"
+	"github.com/kobtea/iapetus/pkg/util"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 )
 
 func NewProxyHandler(config config.Config) (http.Handler, error) {
+	logger := util.NewLogger(config.Log.Level)
 	cluster := config.Clusters[0] // TODO: support multi clusters
 	d := dispatcher.NewDispatcher(cluster)
 	var err error
@@ -47,6 +50,7 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 		req, e := http.NewRequest(request.Method, reqUrl.String(), request.Body)
 		err = e
 		req.Header = request.Header
+		level.Info(logger).Log("target", node.Name, "query", in.Query, "origin", request.URL.RawQuery)
 		*request = *req
 	}
 	if err != nil {

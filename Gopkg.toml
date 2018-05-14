@@ -62,3 +62,7 @@ required = ["gopkg.in/fsnotify.v1"]
 [[constraint]]
   name = "gopkg.in/alecthomas/kingpin.v2"
   version = "2.2.6"
+
+[[constraint]]
+  name = "github.com/go-kit/kit"
+  version = "0.7.0"

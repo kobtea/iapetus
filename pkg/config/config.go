@@ -6,6 +6,9 @@ import (
 )
 
 type Config struct {
+	Log struct {
+		Level string `yaml:"level"`
+	} `yaml:"log"`
 	Clusters []model.Cluster `yaml:"clusters"`
 }
 
