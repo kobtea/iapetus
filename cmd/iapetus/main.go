@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kobtea/iapetus/pkg/config"
 	"github.com/kobtea/iapetus/pkg/proxy"
+	"github.com/prometheus/common/version"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
 	"net/http"
@@ -16,7 +17,7 @@ var (
 )
 
 func main() {
-	kingpin.Version("0.0.1")
+	kingpin.Version(version.Print("iapetus"))
 	kingpin.Parse()
 
 	buf, err := ioutil.ReadFile(*configFile)
