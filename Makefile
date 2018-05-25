@@ -1,9 +1,10 @@
 GOPATH     ?= $(shell go env GOPATH)
 DEP        ?= $(GOPATH)/bin/dep
 GORELEASER ?= $(GOPATH)/bin/goreleaser
+VERSION    := v$(shell cat VERSION)
 
-.PHONY: setup test build build-snapshot
-all: setup test build build-snapshot
+.PHONY: setup test build build-snapshot sync-tag release
+all: setup test build build-snapshot sync-tag release
 
 setup: $(DEP)
 	@echo '>> setup'
@@ -30,6 +31,18 @@ build-snapshot: $(GORELEASER)
 	BUILD_HOST=$(shell hostname) \
 	BUILD_DATE=$(shell date +%Y%m%d-%H:%M:%S) \
 	$(GORELEASER) release --snapshot --rm-dist --debug
+
+sync-tag:
+	@git rev-parse $(VERSION) > /dev/null 2>&1 || \
+	(git tag -a $(VERSION) -m "release $(VERSION)" && git push origin $(VERSION))
+
+release: $(GORELEASER)
+	@echo '>> release'
+	BUILD_BRANCH=$(shell git symbolic-ref --short HEAD) \
+	BUILD_USER=$(shell whoami) \
+	BUILD_HOST=$(shell hostname) \
+	BUILD_DATE=$(shell date +%Y%m%d-%H:%M:%S) \
+	$(GORELEASER) release --rm-dist --debug
 
 $(DEP):
 	go get -u github.com/golang/dep/cmd/dep
