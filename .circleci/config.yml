@@ -13,13 +13,12 @@ jobs:
           make setup
       - persist_to_workspace:
           root: .
-          paths:
-            - vendor
+          paths: .
   build:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: vendor
+          at: /go/src/github.com/kobtea/iapetus
       - run: |
           make test
           make build
@@ -33,24 +32,27 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: vendor
+          at: /go/src/github.com/kobtea/iapetus
       - run: |
           make release
 workflows:
   version: 2
   build_and_release:
     jobs:
-      - setup
+      - setup:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
       - build:
           requires:
             - setup
           filters:
             tags:
               only: /.*/
-      - tagging:
-          filters:
             branches:
-              only: master
+              only: /.*/
       - release:
           requires:
             - build
@@ -59,3 +61,9 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+  tagging:
+    jobs:
+      - tagging:
+          filters:
+            branches:
+              only: master

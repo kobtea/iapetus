@@ -22,14 +22,14 @@ archive:
     windows: Windows
     386: i386
     amd64: x86_64
-nfpm:
-  homepage: https://github.com/kobtea/iapetus
-  maintainer: Hiroaki Kobayashi <kobtea9696@gmail.com>
-  description: Reverse Proxy for Prometheus
-  license: MIT
-  formats:
-    - deb
-    - rpm
+#nfpm:
+#  homepage: https://github.com/kobtea/iapetus
+#  maintainer: Hiroaki Kobayashi <kobtea9696@gmail.com>
+#  description: Reverse Proxy for Prometheus
+#  license: MIT
+#  formats:
+#    - deb
+#    - rpm
 changelog:
   sort: asc
   filters:
