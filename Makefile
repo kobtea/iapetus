@@ -2,16 +2,19 @@ GOPATH     ?= $(shell go env GOPATH)
 DEP        ?= $(GOPATH)/bin/dep
 GORELEASER ?= $(GOPATH)/bin/goreleaser
 
-.PHONY: test build
-all: test build
+.PHONY: setup test build build-snapshot
+all: setup test build build-snapshot
+
+setup: $(DEP)
+	@echo '>> setup'
+	@$(DEP) ensure -v
 
 test:
 	@echo '>> unit test'
 	@go test ./...
 
-build: $(DEP)
+build:
 	@echo '>> build'
-	@$(DEP) ensure -v
 	@go build -ldflags='\
 	-X github.com/kobtea/iapetus/vendor/github.com/prometheus/common/version.Version=$(shell cat VERSION) \
 	-X github.com/kobtea/iapetus/vendor/github.com/prometheus/common/version.Revision=$(shell git rev-parse HEAD) \
@@ -20,9 +23,8 @@ build: $(DEP)
 	-X github.com/kobtea/iapetus/vendor/github.com/prometheus/common/version.BuildDate=$(shell date +%Y%m%d-%H:%M:%S)' \
 	./cmd/iapetus
 
-build-snapshot: $(DEP) $(GORELEASER)
-	@echo '>> cross-build test'
-	@$(DEP) ensure -v
+build-snapshot: $(GORELEASER)
+	@echo '>> cross-build for testing'
 	BUILD_BRANCH=$(shell git symbolic-ref --short HEAD) \
 	BUILD_USER=$(shell whoami) \
 	BUILD_HOST=$(shell hostname) \
