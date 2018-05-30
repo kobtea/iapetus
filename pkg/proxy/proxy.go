@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"fmt"
+	"path"
 )
 
 func NewProxyHandler(config config.Config) (http.Handler, error) {
@@ -47,9 +49,15 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 			reqUrl.Scheme = "http"
 		}
 		reqUrl.Host = nodeUrl.Host
+		if len(nodeUrl.Path) > 0 {
+			reqUrl.Path = path.Join(nodeUrl.Path, reqUrl.Path)
+		}
+
 		req, e := http.NewRequest(request.Method, reqUrl.String(), request.Body)
 		err = e
 		req.Header = request.Header
+		level.Debug(logger).Log("request", fmt.Sprintf("%s://%s%s", request.URL.Scheme, request.Host, request.RequestURI))
+		level.Debug(logger).Log("backend", fmt.Sprintf("%s://%s%s", reqUrl.Scheme, reqUrl.Host, reqUrl.RequestURI()))
 		level.Info(logger).Log("target", node.Name, "query", in.Query, "origin", request.URL.RawQuery)
 		*request = *req
 	}
