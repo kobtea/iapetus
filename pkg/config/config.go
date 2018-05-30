@@ -9,6 +9,10 @@ type Config struct {
 	Log struct {
 		Level string `yaml:"level"`
 	} `yaml:"log"`
+	Listen struct {
+		Addr   string `yaml:"addr"`
+		Prefix string `yaml:"prefix"`
+	} `yaml:"listen"`
 	Clusters []model.Cluster `yaml:"clusters"`
 }
 

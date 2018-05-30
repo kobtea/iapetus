@@ -11,9 +11,10 @@ import (
 )
 
 var (
-	configFile = kingpin.Flag("config", "iapetus config file path.").Required().String()
-	addr       = kingpin.Flag("addr", "address to listen.").Default(":19090").String()
-	logLevel   = kingpin.Flag("log.level", "log level (debug, info, warn, error)").String()
+	configFile   = kingpin.Flag("config", "iapetus config file path.").Required().String()
+	listenAddr   = kingpin.Flag("listen.addr", "address to listen.").Default(":19090").String()
+	listenPrefix = kingpin.Flag("listen.prefix", "path prefix of this endpoint. remove this prefix when dispatch to a backend.").String()
+	logLevel     = kingpin.Flag("log.level", "log level (debug, info, warn, error)").String()
 )
 
 func main() {
@@ -31,7 +32,12 @@ func main() {
 		return
 	}
 
-	// override log level
+	if len(*listenAddr) > 0 {
+		c.Listen.Addr = *listenAddr
+	}
+	if len(*listenPrefix) > 0 {
+		c.Listen.Prefix = *listenPrefix
+	}
 	if len(*logLevel) > 0 {
 		c.Log.Level = *logLevel
 	}
@@ -42,7 +48,7 @@ func main() {
 		return
 	}
 	server := http.Server{
-		Addr:    *addr,
+		Addr:    c.Listen.Addr,
 		Handler: handler,
 	}
 	if err := server.ListenAndServe(); err != nil {

@@ -40,11 +40,12 @@ $ iapetus --help
 usage: iapetus --config=CONFIG [<flags>]
 
 Flags:
-  --help                 Show context-sensitive help (also try --help-long and --help-man).
-  --config=CONFIG        iapetus config file path.
-  --addr=":19090"        address to listen.
-  --log.level=LOG.LEVEL  log level (debug, info, warn, error)
-  --version              Show application version.
+  --help                         Show context-sensitive help (also try --help-long and --help-man).
+  --config=CONFIG                iapetus config file path.
+  --listen.addr=":19090"         address to listen.
+  --listen.prefix=LISTEN.PREFIX  path prefix of this endpoint. remove this prefix when dispatch to a backend.
+  --log.level=LOG.LEVEL          log level (debug, info, warn, error)
+  --version                      Show application version.
 ```
 
 configuration format is below.

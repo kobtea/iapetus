@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"fmt"
 	"github.com/go-kit/kit/log/level"
 	"github.com/kobtea/iapetus/pkg/config"
 	"github.com/kobtea/iapetus/pkg/dispatcher"
@@ -9,8 +10,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"fmt"
 	"path"
+	"strings"
 )
 
 func NewProxyHandler(config config.Config) (http.Handler, error) {
@@ -49,6 +50,7 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 			reqUrl.Scheme = "http"
 		}
 		reqUrl.Host = nodeUrl.Host
+		reqUrl.Path = strings.TrimPrefix(reqUrl.Path, config.Listen.Prefix)
 		if len(nodeUrl.Path) > 0 {
 			reqUrl.Path = path.Join(nodeUrl.Path, reqUrl.Path)
 		}
