@@ -3,8 +3,8 @@ DEP        ?= $(GOPATH)/bin/dep
 GORELEASER ?= $(GOPATH)/bin/goreleaser
 VERSION    := v$(shell cat VERSION)
 
-.PHONY: setup test build build-snapshot sync-tag release
-all: setup test build build-snapshot sync-tag release
+.PHONY: setup test build build-snapshot sync-tag release docker-build docker-release
+all: setup test build build-snapshot sync-tag release docker-build docker-release
 
 setup: $(DEP)
 	@echo '>> setup'
@@ -45,6 +45,15 @@ release: $(GORELEASER)
 	BUILD_HOST=$(shell hostname) \
 	BUILD_DATE=$(shell date +%Y%m%d-%H:%M:%S) \
 	$(GORELEASER) release --rm-dist --debug
+
+docker-build:
+	@echo '>> build docker image'
+	@docker build -t kobtea/iapetus:$(shell cat VERSION) .
+
+docker-release: docker-build
+	@echo '>> release docker image'
+	@docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
+	@docker push kobtea/iapetus:$(shell cat VERSION)
 
 $(DEP):
 	go get -u github.com/golang/dep/cmd/dep
