@@ -34,6 +34,8 @@ jobs:
       - attach_workspace:
           at: /go/src/github.com/kobtea/iapetus
       - run: |
+          sudo apt update
+          sudo apt install -y rpm
           make release
           setup_remote_docker
           make docker-release
