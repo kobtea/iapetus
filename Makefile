@@ -56,7 +56,7 @@ docker-release: docker-build
 	@docker push kobtea/iapetus:$(shell cat VERSION)
 
 $(DEP):
-	go get -u github.com/golang/dep/cmd/dep
+	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 $(GORELEASER): $(DEP)
 	go get golang.org/x/tools/cmd/stringer
