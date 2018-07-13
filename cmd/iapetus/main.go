@@ -42,6 +42,13 @@ func main() {
 		c.Log.Level = *logLevel
 	}
 
+	if err := config.Validate(c); err != nil {
+		for _, e := range err {
+			fmt.Println(e.Error())
+		}
+		return
+	}
+
 	handler, err := proxy.NewProxyHandler(*c)
 	if err != nil {
 		fmt.Println(err.Error())
