@@ -19,6 +19,9 @@ func NewInput(r *http.Request) (Input, error) {
 	if v := r.FormValue("query"); v != "" {
 		in.Query = v
 	}
+	if v := r.FormValue("match[]"); v != "" {
+		in.Query = v
+	}
 	if v := r.FormValue("time"); v != "" {
 		t, err := util.ParseTime(v)
 		if err != nil {

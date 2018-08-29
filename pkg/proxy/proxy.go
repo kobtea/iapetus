@@ -34,10 +34,19 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 			err = e
 			return
 		}
-		if in.Query != request.FormValue("query") {
-			q := reqUrl.Query()
-			q.Set("query", in.Query)
-			reqUrl.RawQuery = q.Encode()
+		if request.FormValue("query") != "" {
+			if in.Query != request.FormValue("query") {
+				q := reqUrl.Query()
+				q.Set("query", in.Query)
+				reqUrl.RawQuery = q.Encode()
+			}
+		}
+		if request.FormValue("match[]") != "" {
+			if in.Query != request.FormValue("match[]") {
+				q := reqUrl.Query()
+				q.Set("match[]", in.Query)
+				reqUrl.RawQuery = q.Encode()
+			}
 		}
 
 		nodeUrl, e := url.Parse(node.Url)
