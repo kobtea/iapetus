@@ -28,15 +28,35 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 		}
 		node := d.FindNode(in)
 
-		// update query
-		in.Query, err = relabel.Process(in.Query, node.Relabels)
-		if e != nil {
-			err = e
-			return
+		request.ParseForm()
+		if v, ok := request.Form["query"]; ok {
+			// update query
+			in.Query, err = relabel.Process(in.Query, node.Relabels)
+			if e != nil {
+				err = e
+				return
+			}
+
+			if in.Query != v[0] {
+				q := reqUrl.Query()
+				q.Set("query", in.Query)
+				reqUrl.RawQuery = q.Encode()
+			}
 		}
-		if in.Query != request.FormValue("query") {
+		if _, ok := request.Form["match[]"]; ok {
 			q := reqUrl.Query()
-			q.Set("query", in.Query)
+			q.Del("match[]")
+
+			for i := range in.Matchers {
+				// update query
+				in.Matchers[i], err = relabel.Process(in.Matchers[i], node.Relabels)
+				if e != nil {
+					err = e
+					return
+				}
+				q.Add("match[]", in.Matchers[i])
+			}
+
 			reqUrl.RawQuery = q.Encode()
 		}
 
@@ -60,7 +80,7 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 		req.Header = request.Header
 		level.Debug(logger).Log("request", fmt.Sprintf("%s://%s%s", request.URL.Scheme, request.Host, request.RequestURI))
 		level.Debug(logger).Log("backend", fmt.Sprintf("%s://%s%s", reqUrl.Scheme, reqUrl.Host, reqUrl.RequestURI()))
-		level.Info(logger).Log("target", node.Name, "query", in.Query, "origin", request.URL.RawQuery)
+		level.Info(logger).Log("target", node.Name, "query", in.Query, "match[]", fmt.Sprintf("%+v", in.Matchers), "origin", request.URL.RawQuery)
 		*request = *req
 	}
 	if err != nil {

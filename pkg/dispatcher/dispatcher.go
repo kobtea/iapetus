@@ -8,33 +8,38 @@ import (
 )
 
 type Input struct {
-	Query string
-	time  time.Time
-	start time.Time
-	end   time.Time
+	Query    string
+	Matchers []string
+	time     time.Time
+	start    time.Time
+	end      time.Time
 }
 
 func NewInput(r *http.Request) (Input, error) {
 	var in Input
-	if v := r.FormValue("query"); v != "" {
-		in.Query = v
+	r.ParseForm()
+	if v, ok := r.Form["query"]; ok {
+		in.Query = v[0]
 	}
-	if v := r.FormValue("time"); v != "" {
-		t, err := util.ParseTime(v)
+	if v, ok := r.Form["match[]"]; ok {
+		in.Matchers = v
+	}
+	if v, ok := r.Form["time"]; ok {
+		t, err := util.ParseTime(v[0])
 		if err != nil {
 			return Input{}, err
 		}
 		in.time = t
 	}
-	if v := r.FormValue("start"); v != "" {
-		t, err := util.ParseTime(v)
+	if v, ok := r.Form["start"]; ok {
+		t, err := util.ParseTime(v[0])
 		if err != nil {
 			return Input{}, err
 		}
 		in.start = t
 	}
-	if v := r.FormValue("end"); v != "" {
-		t, err := util.ParseTime(v)
+	if v, ok := r.Form["end"]; ok {
+		t, err := util.ParseTime(v[0])
 		if err != nil {
 			return Input{}, err
 		}
