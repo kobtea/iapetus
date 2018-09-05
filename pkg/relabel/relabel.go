@@ -24,23 +24,42 @@ func MargeLabelSet(ls model.LabelSet, dst []*labels.Matcher) {
 	}
 }
 
+func removeExtraLabels(ol map[string]bool, ls model.LabelSet) {
+	if len(ol) != len(ls) {
+		for k := range ls {
+			if _, ok := ol[string(k)]; !ok {
+				delete(ls, k)
+			}
+		}
+	}
+}
+
 func Process(query string, configs []*config.RelabelConfig) (string, error) {
 	expr, err := promql.ParseExpr(query)
 	if err != nil {
 		return "", err
 	}
 	promql.Inspect(expr, func(node promql.Node, nodes []promql.Node) bool {
+		ol := map[string]bool{}
 		switch n := node.(type) {
 		case *promql.VectorSelector:
 			ls := Matchers2LabelSet(n.LabelMatchers)
+			for k := range ls {
+				ol[string(k)] = true
+			}
 			ls2 := pl.Process(ls, configs...)
+			removeExtraLabels(ol, ls2)
 			MargeLabelSet(ls2, n.LabelMatchers)
 			if v, ok := ls2["__name__"]; ok {
 				n.Name = string(v)
 			}
 		case *promql.MatrixSelector:
 			ls := Matchers2LabelSet(n.LabelMatchers)
+			for k := range ls {
+				ol[string(k)] = true
+			}
 			ls2 := pl.Process(ls, configs...)
+			removeExtraLabels(ol, ls2)
 			MargeLabelSet(ls2, n.LabelMatchers)
 			if v, ok := ls2["__name__"]; ok {
 				n.Name = string(v)
