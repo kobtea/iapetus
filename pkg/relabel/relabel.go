@@ -16,7 +16,7 @@ func Matchers2LabelSet(ms []*labels.Matcher) model.LabelSet {
 	return ls
 }
 
-func MargeLabelSet(ls model.LabelSet, dst []*labels.Matcher) {
+func MergeLabelSet(ls model.LabelSet, dst []*labels.Matcher) {
 	for _, m := range dst {
 		if v, ok := ls[model.LabelName(m.Name)]; ok {
 			m.Value = string(v)
@@ -34,14 +34,14 @@ func Process(query string, configs []*config.RelabelConfig) (string, error) {
 		case *promql.VectorSelector:
 			ls := Matchers2LabelSet(n.LabelMatchers)
 			ls2 := pl.Process(ls, configs...)
-			MargeLabelSet(ls2, n.LabelMatchers)
+			MergeLabelSet(ls2, n.LabelMatchers)
 			if v, ok := ls2["__name__"]; ok {
 				n.Name = string(v)
 			}
 		case *promql.MatrixSelector:
 			ls := Matchers2LabelSet(n.LabelMatchers)
 			ls2 := pl.Process(ls, configs...)
-			MargeLabelSet(ls2, n.LabelMatchers)
+			MergeLabelSet(ls2, n.LabelMatchers)
 			if v, ok := ls2["__name__"]; ok {
 				n.Name = string(v)
 			}
