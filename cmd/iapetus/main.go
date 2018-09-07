@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-kit/kit/log/level"
 	"github.com/kobtea/iapetus/pkg/config"
 	"github.com/kobtea/iapetus/pkg/proxy"
 	"github.com/kobtea/iapetus/pkg/util"
@@ -42,6 +41,7 @@ func main() {
 	}
 	if len(*logLevel) > 0 {
 		c.Log.Level = *logLevel
+		util.SetLogFilterLevel(c.Log.Level)
 	}
 
 	if err := config.Validate(c); err != nil {
@@ -59,7 +59,7 @@ func main() {
 	server := http.Server{
 		Addr:     c.Listen.Addr,
 		Handler:  handler,
-		ErrorLog: util.NewStdLogger(level.Error(util.NewLogger(c.Log.Level))),
+		ErrorLog: util.GetStdErrorLogger(),
 	}
 	if err := server.ListenAndServe(); err != nil {
 		fmt.Println(err.Error())

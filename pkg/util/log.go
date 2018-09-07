@@ -8,8 +8,14 @@ import (
 	"os"
 )
 
-func NewLogger(lv string) log.Logger {
-	logger := log.NewLogfmtLogger(os.Stdout)
+var logger = newLogger()
+
+func newLogger() *log.Logger {
+	l := log.NewLogfmtLogger(os.Stdout)
+	return &l
+}
+
+func SetLogFilterLevel(lv string) {
 	var op level.Option
 	switch lv {
 	case "debug":
@@ -21,14 +27,19 @@ func NewLogger(lv string) log.Logger {
 	case "error":
 		op = level.AllowError()
 	default:
-		logger.Log("msg", fmt.Sprintf("invalid log level: %s. use `info` instead.", lv))
+		(*logger).Log("msg", fmt.Sprintf("invalid log level: %s. use `info` instead.", lv))
 		op = level.AllowInfo()
 	}
-	logger = level.NewFilter(logger, op)
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
-	return logger
+	l := level.NewFilter(*logger, op)
+	logger = &l // FIXME
 }
 
-func NewStdLogger(l log.Logger) *stdlog.Logger {
-	return stdlog.New(log.NewStdlibAdapter(l), "", 0)
+func GetLogger() *log.Logger {
+	l := log.With(*logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
+	return &l
+}
+
+func GetStdErrorLogger() *stdlog.Logger {
+	l := log.With(*logger, "ts", log.DefaultTimestampUTC)
+	return stdlog.New(log.NewStdlibAdapter(level.Error(l)), "", stdlog.Lshortfile)
 }

@@ -15,7 +15,8 @@ import (
 )
 
 func NewProxyHandler(config config.Config) (http.Handler, error) {
-	logger := util.NewLogger(config.Log.Level)
+	util.SetLogFilterLevel(config.Log.Level)
+	logger := util.GetLogger()
 	cluster := config.Clusters[0] // TODO: support multi clusters
 	d := dispatcher.NewDispatcher(cluster)
 	var err error
@@ -78,9 +79,9 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 		req, e := http.NewRequest(request.Method, reqUrl.String(), request.Body)
 		err = e
 		req.Header = request.Header
-		level.Debug(logger).Log("request", fmt.Sprintf("%s://%s%s", request.URL.Scheme, request.Host, request.RequestURI))
-		level.Debug(logger).Log("backend", fmt.Sprintf("%s://%s%s", reqUrl.Scheme, reqUrl.Host, reqUrl.RequestURI()))
-		level.Info(logger).Log("target", node.Name, "query", in.Query, "match[]", fmt.Sprintf("%+v", in.Matchers), "origin", request.URL.RawQuery)
+		level.Debug(*logger).Log("request", fmt.Sprintf("%s://%s%s", request.URL.Scheme, request.Host, request.RequestURI))
+		level.Debug(*logger).Log("backend", fmt.Sprintf("%s://%s%s", reqUrl.Scheme, reqUrl.Host, reqUrl.RequestURI()))
+		level.Info(*logger).Log("target", node.Name, "query", in.Query, "match[]", fmt.Sprintf("%+v", in.Matchers), "origin", request.URL.RawQuery)
 		*request = *req
 	}
 	if err != nil {
@@ -88,7 +89,7 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 	}
 	proxy := &httputil.ReverseProxy{
 		Director: director,
-		ErrorLog: util.NewStdLogger(level.Error(logger)),
+		ErrorLog: util.GetStdErrorLogger(),
 	}
 	return proxy, nil
 }
