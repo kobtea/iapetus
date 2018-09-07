@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-kit/kit/log/level"
 	"github.com/kobtea/iapetus/pkg/config"
 	"github.com/kobtea/iapetus/pkg/proxy"
+	"github.com/kobtea/iapetus/pkg/util"
 	"github.com/prometheus/common/version"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
@@ -55,8 +57,9 @@ func main() {
 		return
 	}
 	server := http.Server{
-		Addr:    c.Listen.Addr,
-		Handler: handler,
+		Addr:     c.Listen.Addr,
+		Handler:  handler,
+		ErrorLog: util.NewStdLogger(level.Error(util.NewLogger(c.Log.Level))),
 	}
 	if err := server.ListenAndServe(); err != nil {
 		fmt.Println(err.Error())

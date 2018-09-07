@@ -86,6 +86,9 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	proxy := &httputil.ReverseProxy{Director: director}
+	proxy := &httputil.ReverseProxy{
+		Director: director,
+		ErrorLog: util.NewStdLogger(level.Error(logger)),
+	}
 	return proxy, nil
 }
