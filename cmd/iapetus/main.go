@@ -10,6 +10,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 var (
@@ -25,12 +26,12 @@ func main() {
 
 	buf, err := ioutil.ReadFile(*configFile)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
 	c, err := config.Parse(buf)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
 
@@ -43,25 +44,26 @@ func main() {
 	if len(*logLevel) > 0 {
 		c.Log.Level = *logLevel
 	}
+	logger := util.NewLogger(c.Log.Level)
 
 	if err := config.Validate(c); err != nil {
 		for _, e := range err {
-			fmt.Println(e.Error())
+			level.Error(logger).Log("msg", e.Error())
 		}
 		return
 	}
 
 	handler, err := proxy.NewProxyHandler(*c)
 	if err != nil {
-		fmt.Println(err.Error())
+		level.Error(logger).Log("msg", err.Error())
 		return
 	}
 	server := http.Server{
 		Addr:     c.Listen.Addr,
 		Handler:  handler,
-		ErrorLog: util.NewStdLogger(level.Error(util.NewLogger(c.Log.Level))),
+		ErrorLog: util.NewStdLogger(level.Error(logger)),
 	}
 	if err := server.ListenAndServe(); err != nil {
-		fmt.Println(err.Error())
+		level.Error(logger).Log("msg", err.Error())
 	}
 }

@@ -25,10 +25,11 @@ func NewLogger(lv string) log.Logger {
 		op = level.AllowInfo()
 	}
 	logger = level.NewFilter(logger, op)
+	// When used as StdLogger, if we do not want `caller` to duplicate, remove it here.
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
 	return logger
 }
 
 func NewStdLogger(l log.Logger) *stdlog.Logger {
-	return stdlog.New(log.NewStdlibAdapter(l), "", 0)
+	return stdlog.New(log.NewStdlibAdapter(l), "", stdlog.Lshortfile)
 }
