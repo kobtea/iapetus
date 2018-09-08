@@ -49,11 +49,13 @@ release: $(GORELEASER)
 docker-build:
 	@echo '>> build docker image'
 	@docker build -t kobtea/iapetus:$(shell cat VERSION) .
+	@docker build -t kobtea/iapetus:latest .
 
 docker-release: docker-build
 	@echo '>> release docker image'
 	@docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
 	@docker push kobtea/iapetus:$(shell cat VERSION)
+	@docker push kobtea/iapetus:latest
 
 $(DEP):
 	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
