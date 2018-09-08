@@ -20,6 +20,9 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 	d := dispatcher.NewDispatcher(cluster)
 	var err error
 	director := func(request *http.Request) {
+		if len(request.URL.Scheme) == 0 {
+			request.URL.Scheme = "http"
+		}
 		reqUrl := *request.URL
 		in, e := dispatcher.NewInput(request)
 		if e != nil {
