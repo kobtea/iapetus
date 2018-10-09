@@ -1,6 +1,6 @@
 defaults: &defaults
   docker:
-    - image: circleci/golang:1.10.2
+    - image: circleci/golang:1.11
   working_directory: /go/src/github.com/kobtea/iapetus
 
 version: 2
