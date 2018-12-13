@@ -1,13 +1,13 @@
 version: '3'
 services:
   grafana:
-    image: grafana/grafana:5.2.3
+    image: grafana/grafana:5.4.1
     volumes:
     - ./grafana/provisioning:/etc/grafana/provisioning
     ports:
     - "3000:3000"
   prometheus1:
-    image: prom/prometheus:v2.3.2
+    image: prom/prometheus:v2.5.0
     volumes:
     - ./prometheus/prometheus1.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -17,7 +17,7 @@ services:
     - node2
     - node3
   prometheus2:
-    image: prom/prometheus:v2.3.2
+    image: prom/prometheus:v2.5.0
     volumes:
     - ./prometheus/prometheus2.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -27,7 +27,7 @@ services:
     - node2
     - node3
   iapetus:
-    image: kobtea/iapetus:0.1.3
+    image: kobtea/iapetus:0.1.4
     volumes:
     - ./iapetus/iapetus.yml:/etc/iapetus.yml
     ports:
@@ -36,10 +36,10 @@ services:
     - prometheus1
     - prometheus2
   node1:
-    image: prom/node-exporter:v0.16.0
+    image: prom/node-exporter:v0.17.0
     ports:
     - "9100:9100"
   node2:
-    image: prom/node-exporter:v0.16.0
+    image: prom/node-exporter:v0.17.0
   node3:
-    image: prom/node-exporter:v0.16.0
+    image: prom/node-exporter:v0.17.0
