@@ -39,7 +39,7 @@ jobs:
       - setup_remote_docker
       - run: |
           sudo apt update
-          sudo apt install -y rpm
+          sudo apt install -y wget rpm
           make release
           make docker-release
 workflows:
