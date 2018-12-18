@@ -114,6 +114,16 @@ func TestProcess(t *testing.T) {
 			`foo_avg{bar="baz"}`,
 			nil,
 		},
+		{
+			`{__name__="foo"}`,
+			`foo_avg`,
+			nil,
+		},
+		{
+			`{__name__=~"foo"}`,
+			`{__name__=~"foo_avg"}`,
+			nil,
+		},
 	}
 	for _, test := range tests {
 		res, err := Process(test.in, c)
