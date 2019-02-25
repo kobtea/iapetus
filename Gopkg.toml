@@ -25,7 +25,7 @@
 #   unused-packages = true
 
 # https://github.com/golang/dep/issues/1799
-required = ["gopkg.in/fsnotify.v1"]
+required = ["gopkg.in/fsnotify.v1", "github.com/miekg/dns"]
 
 [[constraint]]
   name = "gopkg.in/fsnotify.v1"
@@ -33,11 +33,11 @@ required = ["gopkg.in/fsnotify.v1"]
 
 [[constraint]]
   name = "github.com/prometheus/common"
-  revision = "89604d197083d4781071d3c65855d24ecfb0a563"
+  revision = "b36ad289a3eaecdc52470a19591146a2c0ffb532"
 
 [[constraint]]
   name = "github.com/prometheus/prometheus"
-  version = "v2.2.1"
+  version = "v2.7.1"
 
 [[override]]
   name = "github.com/Azure/azure-sdk-for-go"
@@ -45,15 +45,15 @@ required = ["gopkg.in/fsnotify.v1"]
 
 [[override]]
   name = "github.com/Azure/go-autorest"
-  revision = "8a25372bbfec739b8719a9e3987400d15ef9e179"
+  version = "v10.8.1"
 
 [[override]]
   name = "k8s.io/client-go"
-  branch = "release-3.0"
+  version = "kubernetes-1.13.0"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  revision = "9603df80256c35a1dd4bc3037ed9690737af941b"
+  version = "kubernetes-1.13.0"
 
 [prune]
   go-tests = true
@@ -65,4 +65,8 @@ required = ["gopkg.in/fsnotify.v1"]
 
 [[constraint]]
   name = "github.com/go-kit/kit"
-  version = "0.7.0"
+  version = "0.8.0"
+
+[[override]]
+  name = "github.com/miekg/dns"
+  revision = "5364553f1ee9cddc7ac8b62dce148309c386695b"

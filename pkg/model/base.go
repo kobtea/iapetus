@@ -1,6 +1,8 @@
 package model
 
-import pc "github.com/prometheus/prometheus/config"
+import (
+	"github.com/prometheus/prometheus/pkg/relabel"
+)
 
 type Cluster struct {
 	Name  string `yaml:"name"`
@@ -9,9 +11,9 @@ type Cluster struct {
 }
 
 type Node struct {
-	Name     string              `yaml:"name"`
-	Url      string              `yaml:"url"`
-	Relabels []*pc.RelabelConfig `yaml:"relabels"`
+	Name     string            `yaml:"name"`
+	Url      string            `yaml:"url"`
+	Relabels []*relabel.Config `yaml:"relabels"`
 }
 
 type Rule struct {
