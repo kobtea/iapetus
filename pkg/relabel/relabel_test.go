@@ -2,8 +2,8 @@ package relabel
 
 import (
 	"github.com/prometheus/common/model"
-	"github.com/prometheus/prometheus/config"
 	"github.com/prometheus/prometheus/pkg/labels"
+	"github.com/prometheus/prometheus/pkg/relabel"
 	"reflect"
 	"testing"
 )
@@ -76,22 +76,22 @@ func TestMergeLabelSet(t *testing.T) {
 }
 
 func TestProcess(t *testing.T) {
-	c := []*config.RelabelConfig{
+	c := []*relabel.Config{
 		{
 			SourceLabels: model.LabelNames{"__name__"},
 			Separator:    ";",
-			Regex:        config.MustNewRegexp("(.*)"),
+			Regex:        relabel.MustNewRegexp("(.*)"),
 			TargetLabel:  "__name__",
 			Replacement:  "${1}_avg",
-			Action:       config.RelabelReplace,
+			Action:       relabel.Replace,
 		},
 		{
 			SourceLabels: model.LabelNames{"__name__"},
 			Separator:    ";",
-			Regex:        config.MustNewRegexp("_avg"),
+			Regex:        relabel.MustNewRegexp("_avg"),
 			TargetLabel:  "__name__",
 			Replacement:  "$1",
-			Action:       config.RelabelDrop,
+			Action:       relabel.Drop,
 		},
 	}
 	tests := []struct {

@@ -2,8 +2,8 @@ package relabel
 
 import (
 	"github.com/prometheus/common/model"
-	"github.com/prometheus/prometheus/config"
 	"github.com/prometheus/prometheus/pkg/labels"
+	"github.com/prometheus/prometheus/pkg/relabel"
 	"github.com/prometheus/prometheus/promql"
 	pl "github.com/prometheus/prometheus/relabel"
 )
@@ -24,12 +24,12 @@ func MergeLabelSet(ls model.LabelSet, dst []*labels.Matcher) {
 	}
 }
 
-func Process(query string, configs []*config.RelabelConfig) (string, error) {
+func Process(query string, configs []*relabel.Config) (string, error) {
 	expr, err := promql.ParseExpr(query)
 	if err != nil {
 		return "", err
 	}
-	promql.Inspect(expr, func(node promql.Node, nodes []promql.Node) bool {
+	promql.Inspect(expr, func(node promql.Node, nodes []promql.Node) error {
 		switch n := node.(type) {
 		case *promql.VectorSelector:
 			ls := Matchers2LabelSet(n.LabelMatchers)
@@ -58,7 +58,7 @@ func Process(query string, configs []*config.RelabelConfig) (string, error) {
 				}
 			}
 		}
-		return true
+		return nil
 	})
 	return expr.String(), nil
 }
