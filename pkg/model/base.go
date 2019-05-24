@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/pkg/relabel"
 )
 
@@ -17,10 +18,11 @@ type Node struct {
 }
 
 type Rule struct {
-	Target  string           `yaml:"target"`
-	Default bool             `yaml:"default"`
-	Range   DurationCriteria `yaml:"range"`
-	Time    TimeCriteria     `yaml:"time"`
-	Start   TimeCriteria     `yaml:"start"`
-	End     TimeCriteria     `yaml:"end"`
+	Target         string           `yaml:"target"`
+	Default        bool             `yaml:"default"`
+	Range          DurationCriteria `yaml:"range"`
+	Time           TimeCriteria     `yaml:"time"`
+	Start          TimeCriteria     `yaml:"start"`
+	End            TimeCriteria     `yaml:"end"`
+	RequiredLabels model.LabelSet   `yaml:"required_labels"`
 }

@@ -3,6 +3,9 @@ package dispatcher
 import (
 	"github.com/kobtea/iapetus/pkg/model"
 	"github.com/kobtea/iapetus/pkg/util"
+	pm "github.com/prometheus/common/model"
+	"github.com/prometheus/prometheus/pkg/labels"
+	"github.com/prometheus/prometheus/promql"
 	"net/http"
 	"time"
 )
@@ -97,6 +100,18 @@ func (d Dispatcher) FindNode(in Input) *model.Node {
 				}
 			}
 		}
+		if len(rule.RequiredLabels) != 0 {
+			if len(in.Query) != 0 {
+				inMatchers, err := promql.ParseMetricSelector(in.Query)
+				if err != nil {
+					// FIXME: logging
+				}
+				if satisfy(inMatchers, rule.RequiredLabels) {
+					return d.resolveNode(rule.Target)
+				}
+			}
+			// TODO: support in.Matchers
+		}
 	}
 	return d.defaultNode()
 }
@@ -111,4 +126,25 @@ func (d Dispatcher) defaultNode() *model.Node {
 		return &d.Cluster.Nodes[0]
 	}
 	return nil
+}
+
+func satisfy(matchers []*labels.Matcher, requiredLabels pm.LabelSet) bool {
+	if len(matchers) < len(requiredLabels) {
+		return false
+	}
+	for lname, lval := range requiredLabels {
+		contain := false
+		for _, matcher := range matchers {
+			if matcher.Name == string(lname) {
+				contain = true
+				if matcher.Type != labels.MatchEqual || matcher.Value != string(lval) {
+					return false
+				}
+			}
+		}
+		if !contain {
+			return false
+		}
+	}
+	return true
 }
