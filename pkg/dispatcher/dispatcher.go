@@ -102,15 +102,19 @@ func (d Dispatcher) FindNode(in Input) *model.Node {
 		}
 		if len(rule.RequiredLabels) != 0 {
 			if len(in.Query) != 0 {
-				inMatchers, err := promql.ParseMetricSelector(in.Query)
-				if err != nil {
-					// FIXME: logging
-				}
-				if satisfy(inMatchers, rule.RequiredLabels) {
-					return d.resolveNode(rule.Target)
+				if inMatchers, err := promql.ParseMetricSelector(in.Query); err == nil {
+					if satisfy(inMatchers, rule.RequiredLabels) {
+						return d.resolveNode(rule.Target)
+					}
 				}
 			}
-			// TODO: support in.Matchers
+			for _, matcher := range in.Matchers {
+				if inMatchers, err := promql.ParseMetricSelector(matcher); err == nil {
+					if satisfy(inMatchers, rule.RequiredLabels) {
+						return d.resolveNode(rule.Target)
+					}
+				}
+			}
 		}
 	}
 	return d.defaultNode()
