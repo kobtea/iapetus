@@ -1,7 +1,7 @@
 version: '3'
 services:
   grafana:
-    image: grafana/grafana:6.1.6
+    image: grafana/grafana:6.2.1
     volumes:
     - ./grafana/provisioning:/etc/grafana/provisioning
     ports:
@@ -27,7 +27,7 @@ services:
     - node2
     - node3
   iapetus:
-    image: kobtea/iapetus:0.1.8
+    image: kobtea/iapetus:0.2.0
     volumes:
     - ./iapetus/iapetus.yml:/etc/iapetus.yml
     ports:
