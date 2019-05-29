@@ -18,6 +18,9 @@ clusters:
     rules:
       - target: primary
         default: true
+      - target: primary
+        required_labels:
+          job: foo
       - target: archive
         range: "> 1d"
       - target: archive
