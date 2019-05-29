@@ -71,7 +71,8 @@ clusters:
     # - default: <bool>, use when no match other rules
     # - start: <op duration>, compare `start` at request parameter
     # - end: <op duration>, compare `end` at request parameter
-    # - range: <op duration>, range is between `start` and `end` at request parameter.
+    # - range: <op duration>, range is between `start` and `end` at request parameter
+    # - required_labels: [ <label_name>: <label_value> ... ], find labels from `query` or `match[]` parameter(s)
     rules:
       [ - <rules>, ...]
 ```
