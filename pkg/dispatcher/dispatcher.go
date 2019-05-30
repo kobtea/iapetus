@@ -102,15 +102,15 @@ func (d Dispatcher) FindNode(in Input) *model.Node {
 		}
 		if len(rule.RequiredLabels) != 0 {
 			if len(in.Query) != 0 {
-				if inMatchers, err := promql.ParseMetricSelector(in.Query); err == nil {
-					if satisfy(inMatchers, rule.RequiredLabels) {
+				if inExpr, err := promql.ParseExpr(in.Query); err == nil {
+					if satisfy(inExpr, rule.RequiredLabels) {
 						return d.resolveNode(rule.Target)
 					}
 				}
 			}
 			for _, matcher := range in.Matchers {
-				if inMatchers, err := promql.ParseMetricSelector(matcher); err == nil {
-					if satisfy(inMatchers, rule.RequiredLabels) {
+				if inExpr, err := promql.ParseExpr(matcher); err == nil {
+					if satisfy(inExpr, rule.RequiredLabels) {
 						return d.resolveNode(rule.Target)
 					}
 				}
@@ -132,7 +132,25 @@ func (d Dispatcher) defaultNode() *model.Node {
 	return nil
 }
 
-func satisfy(matchers []*labels.Matcher, requiredLabels pm.LabelSet) bool {
+func satisfy(expr promql.Expr, requiredLabels pm.LabelSet) bool {
+	res := false
+	promql.Inspect(expr, func(node promql.Node, nodes []promql.Node) error {
+		switch n := node.(type) {
+		case *promql.VectorSelector:
+			if containRequiredLabels(n.LabelMatchers, requiredLabels) {
+				res = true
+			}
+		case *promql.MatrixSelector:
+			if containRequiredLabels(n.LabelMatchers, requiredLabels) {
+				res = true
+			}
+		}
+		return nil
+	})
+	return res
+}
+
+func containRequiredLabels(matchers []*labels.Matcher, requiredLabels pm.LabelSet) bool {
 	if len(matchers) < len(requiredLabels) {
 		return false
 	}
