@@ -25,6 +25,10 @@ func MergeLabelSet(ls model.LabelSet, dst []*labels.Matcher) {
 }
 
 func Process(query string, configs []*relabel.Config) (string, error) {
+	if len(configs) == 0 {
+		return query, nil
+	}
+
 	expr, err := promql.ParseExpr(query)
 	if err != nil {
 		return "", err
