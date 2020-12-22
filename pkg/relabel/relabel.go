@@ -1,60 +1,51 @@
 package relabel
 
 import (
-	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/pkg/relabel"
-	"github.com/prometheus/prometheus/promql"
-	pl "github.com/prometheus/prometheus/relabel"
+	"github.com/prometheus/prometheus/promql/parser"
 )
 
-func Matchers2LabelSet(ms []*labels.Matcher) model.LabelSet {
-	ls := make(model.LabelSet)
+func Matchers2Labels(ms []*labels.Matcher) labels.Labels {
+	var ls labels.Labels
 	for _, m := range ms {
-		ls[model.LabelName(m.Name)] = model.LabelValue(m.Value)
+		ls = append(ls, labels.Label{Name: m.Name, Value: m.Value})
 	}
 	return ls
 }
 
-func MergeLabelSet(ls model.LabelSet, dst []*labels.Matcher) {
+func MergeLabels(ls labels.Labels, dst []*labels.Matcher) {
 	for _, m := range dst {
-		if v, ok := ls[model.LabelName(m.Name)]; ok {
-			m.Value = string(v)
+		if v := ls.Get(m.Name); v != "" {
+			m.Value = v
 		}
 	}
 }
 
 func Process(query string, configs []*relabel.Config) (string, error) {
-	expr, err := promql.ParseExpr(query)
+	expr, err := parser.ParseExpr(query)
 	if err != nil {
 		return "", err
 	}
-	promql.Inspect(expr, func(node promql.Node, nodes []promql.Node) error {
+	parser.Inspect(expr, func(node parser.Node, nodes []parser.Node) error {
 		switch n := node.(type) {
-		case *promql.VectorSelector:
-			ls := Matchers2LabelSet(n.LabelMatchers)
-			ls2 := Matchers2LabelSet(n.LabelMatchers)
-			pl.Process(ls2, configs...)
-			MergeLabelSet(ls2, n.LabelMatchers)
-			if v, ok := ls["__name__"]; ok && string(v) == n.Name {
-				if v2, ok2 := ls2["__name__"]; ok2 {
-					n.Name = string(v2)
-				}
+		case *parser.VectorSelector:
+			ls := Matchers2Labels(n.LabelMatchers)
+			relabeledLs := relabel.Process(ls, configs...)
+			if relabeledLs != nil {
+				ls = relabeledLs
 			}
-			// https://github.com/prometheus/prometheus/blob/v2.2.1/promql/printer.go#L218-L221
+			MergeLabels(ls, n.LabelMatchers)
+			// relabel a metric name not a __name__ label
+			// e.g. foo{bar="baz"} => relabeled_foo{bar="baz"}
+			if v := ls.Get(labels.MetricName); v != "" && n.Name != "" {
+				n.Name = v
+			}
+			// https://github.com/prometheus/prometheus/blob/v2.23.0/promql/parser/printer.go#L161
+			// but ms.Value has already been relabeled, that differ from original n.Name
 			for _, ms := range n.LabelMatchers {
-				if ms.Name == "__name__" && ms.Type == labels.MatchEqual {
+				if ms.Name == labels.MetricName && ms.Type == labels.MatchEqual {
 					n.Name = ms.Value
-				}
-			}
-		case *promql.MatrixSelector:
-			ls := Matchers2LabelSet(n.LabelMatchers)
-			ls2 := Matchers2LabelSet(n.LabelMatchers)
-			pl.Process(ls2, configs...)
-			MergeLabelSet(ls2, n.LabelMatchers)
-			if v, ok := ls["__name__"]; ok && string(v) == n.Name {
-				if v2, ok2 := ls2["__name__"]; ok2 {
-					n.Name = string(v2)
 				}
 			}
 		}
