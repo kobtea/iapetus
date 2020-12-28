@@ -28,7 +28,6 @@ Go to https://github.com/kobtea/iapetus/releases
 ```bash
 $ go get -d github.com/kobtea/iapetus
 $ cd $GOPATH/src/github.com/kobtea/iapetus
-$ dep ensure
 $ make build
 ```
 
