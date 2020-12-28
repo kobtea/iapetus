@@ -8,14 +8,14 @@ import (
 	"testing"
 )
 
-func TestMatchers2LabelSet(t *testing.T) {
+func TestMatchers2Labels(t *testing.T) {
 	tests := []struct {
 		m  []*labels.Matcher
-		ls model.LabelSet
+		ls labels.Labels
 	}{
 		{
 			[]*labels.Matcher{},
-			model.LabelSet{},
+			labels.FromStrings(),
 		},
 		{
 			[]*labels.Matcher{
@@ -25,7 +25,7 @@ func TestMatchers2LabelSet(t *testing.T) {
 					Value: "bar",
 				},
 			},
-			model.LabelSet{"foo": "bar"},
+			labels.FromStrings("foo", "bar"),
 		},
 		{
 			[]*labels.Matcher{
@@ -35,40 +35,40 @@ func TestMatchers2LabelSet(t *testing.T) {
 					Value: "bar.*baz",
 				},
 			},
-			model.LabelSet{"foo": "bar.*baz"},
+			labels.FromStrings("foo", "bar.*baz"),
 		},
 	}
 	for _, test := range tests {
-		res := Matchers2LabelSet(test.m)
+		res := Matchers2Labels(test.m)
 		if !reflect.DeepEqual(res, test.ls) {
 			t.Errorf("expect %v, but got %v", test.ls, res)
 		}
 	}
 }
 
-func TestMergeLabelSet(t *testing.T) {
+func TestMergeLabels(t *testing.T) {
 	m := []*labels.Matcher{{Type: labels.MatchEqual, Name: "foo", Value: "bar"}}
 	tests := []struct {
-		ls model.LabelSet
+		ls labels.Labels
 		m  []*labels.Matcher
 	}{
 		{
-			model.LabelSet{},
+			labels.Labels{},
 			m,
 		},
 		{
-			model.LabelSet{"aaa": "bbb"},
-			append(m),
+			labels.FromStrings("aaa", "bbb"),
+			m,
 		},
 		{
-			model.LabelSet{"foo": "modified"},
+			labels.FromStrings("foo", "modified"),
 			[]*labels.Matcher{{Type: labels.MatchEqual, Name: "foo", Value: "modified"}},
 		},
 	}
 	for _, test := range tests {
 		dst := make([]*labels.Matcher, len(m))
 		copy(dst, m)
-		MergeLabelSet(test.ls, dst)
+		MergeLabels(test.ls, dst)
 		if !reflect.DeepEqual(dst, test.m) {
 			t.Errorf("expect %v, but got %v", test.m, dst)
 		}
@@ -99,6 +99,7 @@ func TestProcess(t *testing.T) {
 		out string
 		err error
 	}{
+		// vector selector
 		{
 			"foo",
 			"foo_avg",
@@ -122,6 +123,12 @@ func TestProcess(t *testing.T) {
 		{
 			`{__name__=~"foo"}`,
 			`{__name__=~"foo_avg"}`,
+			nil,
+		},
+		// matrix selector
+		{
+			`foo[5s]`,
+			`foo_avg[5s]`,
 			nil,
 		},
 	}

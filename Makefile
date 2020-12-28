@@ -1,14 +1,9 @@
 GOPATH     ?= $(shell go env GOPATH)
-DEP        ?= $(GOPATH)/bin/dep
 GORELEASER ?= $(GOPATH)/bin/goreleaser
 VERSION    := v$(shell cat VERSION)
 
-.PHONY: setup test build build-snapshot sync-tag release docker-build docker-release
-all: setup test build build-snapshot sync-tag release docker-build docker-release
-
-setup: $(DEP)
-	@echo '>> setup'
-	@$(DEP) ensure -v
+.PHONY: test build build-snapshot sync-tag release docker-build docker-release
+all: test build build-snapshot sync-tag release docker-build docker-release
 
 test:
 	@echo '>> unit test'
@@ -56,9 +51,6 @@ docker-release: docker-build
 	@docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
 	@docker push kobtea/iapetus:$(shell cat VERSION)
 	@docker push kobtea/iapetus:latest
-
-$(DEP):
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 $(GORELEASER):
 	@wget -O - "https://github.com/goreleaser/goreleaser/releases/download/v0.95.0/goreleaser_$(shell uname -o | cut -d'/' -f2)_$(shell uname -m).tar.gz" | tar xvzf - -C /tmp

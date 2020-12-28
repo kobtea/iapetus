@@ -5,7 +5,7 @@ import (
 	"github.com/kobtea/iapetus/pkg/util"
 	pm "github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/pkg/labels"
-	"github.com/prometheus/prometheus/promql"
+	"github.com/prometheus/prometheus/promql/parser"
 	"net/http"
 	"time"
 )
@@ -102,14 +102,14 @@ func (d Dispatcher) FindNode(in Input) *model.Node {
 		}
 		if len(rule.RequiredLabels) != 0 {
 			if len(in.Query) != 0 {
-				if inExpr, err := promql.ParseExpr(in.Query); err == nil {
+				if inExpr, err := parser.ParseExpr(in.Query); err == nil {
 					if satisfy(inExpr, rule.RequiredLabels) {
 						return d.resolveNode(rule.Target)
 					}
 				}
 			}
 			for _, matcher := range in.Matchers {
-				if inExpr, err := promql.ParseExpr(matcher); err == nil {
+				if inExpr, err := parser.ParseExpr(matcher); err == nil {
 					if satisfy(inExpr, rule.RequiredLabels) {
 						return d.resolveNode(rule.Target)
 					}
@@ -132,16 +132,16 @@ func (d Dispatcher) defaultNode() *model.Node {
 	return nil
 }
 
-func satisfy(expr promql.Expr, requiredLabels pm.LabelSet) bool {
+func satisfy(expr parser.Expr, requiredLabels pm.LabelSet) bool {
 	res := false
-	promql.Inspect(expr, func(node promql.Node, nodes []promql.Node) error {
+	parser.Inspect(expr, func(node parser.Node, nodes []parser.Node) error {
 		switch n := node.(type) {
-		case *promql.VectorSelector:
+		case *parser.VectorSelector:
 			if containRequiredLabels(n.LabelMatchers, requiredLabels) {
 				res = true
 			}
-		case *promql.MatrixSelector:
-			if containRequiredLabels(n.LabelMatchers, requiredLabels) {
+		case *parser.MatrixSelector:
+			if containRequiredLabels(n.VectorSelector.(*parser.VectorSelector).LabelMatchers, requiredLabels) {
 				res = true
 			}
 		}
