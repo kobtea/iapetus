@@ -1,10 +1,12 @@
 package relabel
 
 import (
+	"errors"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/pkg/relabel"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -80,7 +82,7 @@ func TestProcess(t *testing.T) {
 		{
 			SourceLabels: model.LabelNames{"__name__"},
 			Separator:    ";",
-			Regex:        relabel.MustNewRegexp("(.*)"),
+			Regex:        relabel.MustNewRegexp("(foo.*)"),
 			TargetLabel:  "__name__",
 			Replacement:  "${1}_avg",
 			Action:       relabel.Replace,
@@ -125,6 +127,29 @@ func TestProcess(t *testing.T) {
 			`{__name__=~"foo_avg"}`,
 			nil,
 		},
+		// same labels
+		{
+			`{foo="bar",foo=~"b.+"}`,
+			`{foo="bar",foo=~"b.+"}`,
+			nil,
+		},
+		{
+			`{__name__="no_relabel",__name__=~"no_.+"}`,
+			`{__name__="no_relabel",__name__=~"no_.+"}`,
+			nil,
+		},
+		// same labels will only work as expected in situations where no relabeling takes place
+		{
+			`{__name__="foo",__name__=~"fo.+"}`,
+			`{__name__="foo",__name__=~"fo.+"}`,
+			errors.New("duplicate label name"),
+		},
+		// expr
+		{
+			`1 + 2`,
+			`1 + 2`,
+			nil,
+		},
 		// matrix selector
 		{
 			`foo[5s]`,
@@ -137,7 +162,10 @@ func TestProcess(t *testing.T) {
 		if !reflect.DeepEqual(res, test.out) {
 			t.Errorf("expect %v, but got %v", test.out, res)
 		}
-		if !reflect.DeepEqual(err, test.err) {
+		if (err == nil && test.err != nil) || (err != nil && test.err == nil) {
+			t.Errorf("expect %v, but got %v", test.out, res)
+		}
+		if err != nil && test.err != nil && !strings.Contains(err.Error(), test.err.Error()) {
 			t.Errorf("expect %v, but got %v", test.err, err)
 		}
 	}

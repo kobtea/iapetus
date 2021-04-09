@@ -1,9 +1,11 @@
 package relabel
 
 import (
+	"fmt"
 	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/pkg/relabel"
 	"github.com/prometheus/prometheus/promql/parser"
+	"sort"
 )
 
 func Matchers2Labels(ms []*labels.Matcher) labels.Labels {
@@ -32,9 +34,18 @@ func Process(query string, configs []*relabel.Config) (string, error) {
 		case *parser.VectorSelector:
 			ls := Matchers2Labels(n.LabelMatchers)
 			relabeledLs := relabel.Process(ls, configs...)
-			if relabeledLs != nil {
-				ls = relabeledLs
+			if relabeledLs == nil || labels.Equal(ls, relabeledLs) {
+				// did not relabel, keep original node
+				return nil
 			}
+			sort.Sort(ls)
+			if name, isDup := ls.HasDuplicateLabelNames(); isDup {
+				e := fmt.Errorf("duplicate label names (%s) can cause unexpected query result after relabeling."+
+					"consider to avoid using same label name in a query, or to avoid relabeling", name)
+				err = e
+				return e
+			}
+			ls = relabeledLs
 			MergeLabels(ls, n.LabelMatchers)
 			// relabel a metric name not a __name__ label
 			// e.g. foo{bar="baz"} => relabeled_foo{bar="baz"}
@@ -51,5 +62,5 @@ func Process(query string, configs []*relabel.Config) (string, error) {
 		}
 		return nil
 	})
-	return expr.String(), nil
+	return expr.String(), err
 }
