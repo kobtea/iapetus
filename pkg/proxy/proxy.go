@@ -7,12 +7,37 @@ import (
 	"github.com/kobtea/iapetus/pkg/dispatcher"
 	"github.com/kobtea/iapetus/pkg/relabel"
 	"github.com/kobtea/iapetus/pkg/util"
+	phttputil "github.com/prometheus/prometheus/util/httputil"
 	"net/http"
+	"net/http/httptest"
 	"net/http/httputil"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 )
+
+const headerRequestError = "X-Iapetus-Request-Error"
+
+type transport struct {
+	parent     http.RoundTripper
+	corsOrigin *regexp.Regexp
+}
+
+func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
+	if errMsg, ok := r.Header[headerRequestError]; ok {
+		s := fmt.Sprintf(`{"status":"error","errorType":"bad_data","error":"%s"}`, strings.Join(errMsg, ","))
+		rw := httptest.NewRecorder()
+		rw.Header().Set("Content-Type", "application/json")
+		phttputil.SetCORS(rw, t.corsOrigin, r)
+		rw.WriteHeader(http.StatusBadRequest)
+		if _, err := rw.WriteString(s); err != nil {
+			return nil, err
+		}
+		return rw.Result(), nil
+	}
+	return t.parent.RoundTrip(r)
+}
 
 func NewProxyHandler(config config.Config) (http.Handler, error) {
 	logger := util.NewLogger(config.Log.Level)
@@ -34,8 +59,9 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 		request.ParseForm()
 		if v, ok := request.Form["query"]; ok {
 			// update query
-			in.Query, err = relabel.Process(in.Query, node.Relabels)
+			in.Query, e = relabel.Process(in.Query, node.Relabels)
 			if e != nil {
+				request.Header.Set(headerRequestError, e.Error())
 				err = e
 				return
 			}
@@ -92,6 +118,10 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 	proxy := &httputil.ReverseProxy{
 		Director: director,
 		ErrorLog: util.NewStdLogger(level.Error(logger)),
+		Transport: &transport{
+			parent:     http.DefaultTransport,
+			corsOrigin: regexp.MustCompile("^(?:.*)$"),
+		},
 	}
 	return proxy, nil
 }
