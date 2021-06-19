@@ -6,7 +6,7 @@ import (
 	pm "github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/promql/parser"
-	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -18,31 +18,30 @@ type Input struct {
 	end      time.Time
 }
 
-func NewInput(r *http.Request) (Input, error) {
+func NewInput(values url.Values) (Input, error) {
 	var in Input
-	r.ParseForm()
-	if v, ok := r.Form["query"]; ok {
-		in.Query = v[0]
+	if s := values.Get("query"); s != "" {
+		in.Query = s
 	}
-	if v, ok := r.Form["match[]"]; ok {
+	if v, ok := values["match[]"]; ok {
 		in.Matchers = v
 	}
-	if v, ok := r.Form["time"]; ok {
-		t, err := util.ParseTime(v[0])
+	if s := values.Get("time"); s != "" {
+		t, err := util.ParseTime(s)
 		if err != nil {
 			return Input{}, err
 		}
 		in.time = t
 	}
-	if v, ok := r.Form["start"]; ok {
-		t, err := util.ParseTime(v[0])
+	if s := values.Get("start"); s != "" {
+		t, err := util.ParseTime(s)
 		if err != nil {
 			return Input{}, err
 		}
 		in.start = t
 	}
-	if v, ok := r.Form["end"]; ok {
-		t, err := util.ParseTime(v[0])
+	if s := values.Get("end"); s != "" {
+		t, err := util.ParseTime(s)
 		if err != nil {
 			return Input{}, err
 		}
