@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"io"
 	"github.com/go-kit/kit/log/level"
 	"github.com/kobtea/iapetus/pkg/config"
 	"github.com/kobtea/iapetus/pkg/dispatcher"
@@ -106,7 +107,12 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 			reqUrl.Path = path.Join(nodeUrl.Path, reqUrl.Path)
 		}
 
-		req, err := http.NewRequest(request.Method, reqUrl.String(), request.Body)
+		var body io.Reader
+		body = request.Body
+		if request.Method == "POST" {
+			body = strings.NewReader(request.Form.Encode())
+		}
+		req, err := http.NewRequest(request.Method, reqUrl.String(), body)
 		if err != nil {
 			level.Error(logger).Log("msg", err.Error())
 			return
