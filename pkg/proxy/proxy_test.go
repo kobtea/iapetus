@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -72,12 +73,26 @@ func TestNewProxyHandler(t *testing.T) {
 		url.Values{"query": {`{__name__="foo", __name__=~".+"}`}, "start": {"2021-01-01T00:00:00.000Z"}, "end": {"2021-01-02T01:00:00.000Z"}},
 		http.StatusBadRequest,
 	}}
+	// GET
 	for _, test := range tests {
-		req, err := http.NewRequest("GET", "/api/v1/query_range", nil)
+		req, err := http.NewRequest(http.MethodGet, "/api/v1/query_range", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 		req.URL.RawQuery = test.q.Encode()
+		rec := httptest.NewRecorder()
+		proxy.ServeHTTP(rec, req)
+		if rec.Code != test.statusCode {
+			t.Errorf("expect %d, but got %d", test.statusCode, rec.Code)
+		}
+	}
+	// POST
+	for _, test := range tests {
+		req, err := http.NewRequest(http.MethodPost, "/api/v1/query_range", strings.NewReader(test.q.Encode()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		rec := httptest.NewRecorder()
 		proxy.ServeHTTP(rec, req)
 		if rec.Code != test.statusCode {

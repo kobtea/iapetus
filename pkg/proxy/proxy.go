@@ -8,6 +8,7 @@ import (
 	"github.com/kobtea/iapetus/pkg/relabel"
 	"github.com/kobtea/iapetus/pkg/util"
 	phttputil "github.com/prometheus/prometheus/util/httputil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
@@ -39,17 +40,32 @@ func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 	return t.parent.RoundTrip(r)
 }
 
+func formatValues(values url.Values) string {
+	var ss []string
+	for k, v := range values {
+		ss = append(ss, fmt.Sprintf("%s=%s", k, v))
+	}
+	return strings.Join(ss, ",")
+}
+
 func NewProxyHandler(config config.Config) (http.Handler, error) {
 	logger := util.NewLogger(config.Log.Level)
 	cluster := config.Clusters[0] // TODO: support multi clusters
 	d := dispatcher.NewDispatcher(cluster)
 	director := func(request *http.Request) {
-		level.Debug(logger).Log("request", fmt.Sprintf("%s://%s%s", request.URL.Scheme, request.Host, request.RequestURI))
 		if len(request.URL.Scheme) == 0 {
 			request.URL.Scheme = "http"
 		}
 		reqUrl := *request.URL
-		in, err := dispatcher.NewInput(request)
+		if err := request.ParseForm(); err != nil {
+			level.Error(logger).Log("msg", err.Error())
+			return
+		}
+		values := request.Form
+		origValues := formatValues(values)
+		level.Debug(logger).Log("request", fmt.Sprintf("%s://%s%s", request.URL.Scheme, request.Host, request.RequestURI), "values", values.Encode())
+
+		in, err := dispatcher.NewInput(values)
 		if err != nil {
 			request.Header.Set(headerRequestError, err.Error())
 			level.Warn(logger).Log("msg", err.Error())
@@ -57,8 +73,7 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 		}
 		node := d.FindNode(in)
 
-		request.ParseForm()
-		if v, ok := request.Form["query"]; ok {
+		if origQuery := values.Get("query"); origQuery != "" {
 			// update query
 			in.Query, err = relabel.Process(in.Query, node.Relabels)
 			if err != nil {
@@ -67,16 +82,12 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 				return
 			}
 
-			if in.Query != v[0] {
-				q := reqUrl.Query()
-				q.Set("query", in.Query)
-				reqUrl.RawQuery = q.Encode()
+			if in.Query != origQuery {
+				values.Set("query", in.Query)
 			}
 		}
-		if _, ok := request.Form["match[]"]; ok {
-			q := reqUrl.Query()
-			q.Del("match[]")
-
+		if _, ok := values["match[]"]; ok {
+			values.Del("match[]")
 			for i := range in.Matchers {
 				// update query
 				in.Matchers[i], err = relabel.Process(in.Matchers[i], node.Relabels)
@@ -85,10 +96,8 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 					level.Warn(logger).Log("msg", err.Error())
 					return
 				}
-				q.Add("match[]", in.Matchers[i])
+				values.Add("match[]", in.Matchers[i])
 			}
-
-			reqUrl.RawQuery = q.Encode()
 		}
 
 		nodeUrl, err := url.Parse(node.Url)
@@ -106,14 +115,22 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 			reqUrl.Path = path.Join(nodeUrl.Path, reqUrl.Path)
 		}
 
-		req, err := http.NewRequest(request.Method, reqUrl.String(), request.Body)
+		if request.Method == http.MethodGet {
+			reqUrl.RawQuery = values.Encode()
+		}
+		var body io.Reader
+		if request.Method == http.MethodPost {
+			body = strings.NewReader(values.Encode())
+		}
+
+		req, err := http.NewRequest(request.Method, reqUrl.String(), body)
 		if err != nil {
 			level.Error(logger).Log("msg", err.Error())
 			return
 		}
 		req.Header = request.Header
-		level.Debug(logger).Log("backend", fmt.Sprintf("%s://%s%s", reqUrl.Scheme, reqUrl.Host, reqUrl.RequestURI()))
-		level.Info(logger).Log("target", node.Name, "query", in.Query, "match[]", fmt.Sprintf("%+v", in.Matchers), "origin", request.URL.RawQuery)
+		level.Debug(logger).Log("backend", fmt.Sprintf("%s://%s%s", reqUrl.Scheme, reqUrl.Host, reqUrl.RequestURI()), "values", values.Encode())
+		level.Info(logger).Log("target", node.Name, "query", in.Query, "match[]", fmt.Sprintf("%+v", in.Matchers), "origin", origValues)
 		*request = *req
 	}
 	proxy := &httputil.ReverseProxy{
