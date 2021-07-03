@@ -53,5 +53,5 @@ docker-release: docker-build
 	@docker push kobtea/iapetus:latest
 
 $(GORELEASER):
-	@wget -O - "https://github.com/goreleaser/goreleaser/releases/download/v0.95.0/goreleaser_$(shell uname -o | cut -d'/' -f2)_$(shell uname -m).tar.gz" | tar xvzf - -C /tmp
+	@wget -O - "https://github.com/goreleaser/goreleaser/releases/download/v0.172.1/goreleaser_$(shell uname -o | cut -d'/' -f2)_$(shell uname -m).tar.gz" | tar xvzf - -C /tmp
 	@mv /tmp/goreleaser $(GOPATH)/bin
