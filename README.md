@@ -4,17 +4,14 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/kobtea/iapetus)](https://goreportcard.com/report/github.com/kobtea/iapetus)
 
 This project is unstable yet.
-So breaking change may be happen no notice.
+So breaking change may be happened no notice.
 
 
 ## Overview
 
-Iapetus is a reverse proxy for [Prometheus](https://prometheus.io/) that aim to handle long term time series with low cost.
-Like the database of [RRDTool](https://oss.oetiker.ch/rrdtool/), it get recent metrics with high-resolution, and old metrics with low-resolution.
-
-The architecture using iapetus is simple.
-Prepare prometheus nodes that have same time series data but only resolution and retention are different.
-Iapetus dispatch a request to a prometheus node that match proxy rules.
+Iapetus is a reverse proxy for [Prometheus](https://prometheus.io/) that dispatches queries to Prometheus nodes depending on the content of a query, such a label and a timestamp.
+Iapetus also supports relabeling feature, so you can configure relabeling rules for each node.
+To simplify, Iapetus does not query multiple nodes and aggregate that results. It only does dispatch.
 
 
 ## Install
@@ -103,11 +100,6 @@ clusters:
 
 
 ## Roadmap
-
-### Metrics aggregator
-
-Exporting aggregated metrics from a high-resolution prometheus.
-It is for a low-resolution prometheus.
 
 ### Cluster
 
