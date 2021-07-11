@@ -16,6 +16,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 )
 
 const headerRequestError = "X-Iapetus-Request-Error"
@@ -97,6 +98,12 @@ func NewProxyHandler(config config.Config) (http.Handler, error) {
 					return
 				}
 				values.Add("match[]", in.Matchers[i])
+			}
+		}
+		if origStep := values.Get("step"); origStep != "" {
+			step, err := util.ParseDuration(origStep)
+			if err == nil && step < time.Duration(node.MinStep) {
+				values.Set("step", node.MinStep.String())
 			}
 		}
 

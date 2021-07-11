@@ -15,6 +15,7 @@ type Node struct {
 	Name     string            `yaml:"name"`
 	Url      string            `yaml:"url"`
 	Relabels []*relabel.Config `yaml:"relabels"`
+	MinStep  model.Duration    `yaml:"min_step"`
 }
 
 type Rule struct {
