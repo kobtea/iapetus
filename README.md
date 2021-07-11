@@ -61,6 +61,7 @@ clusters:
         relabels:
           # support relabelling rules at prometheus
           [ - <relabel_config> ... ]
+        min_step: <duration>
     # proxy rules
     # each rule are pair of `target: <node_name>` and some rule.
     # support rules are below.
@@ -89,6 +90,7 @@ clusters:
           - source_labels: [__name__]
             target_label: __name__
             replacement: ${1}_avg
+        min_step: 10m
     rules:
       - target: primary
         default: true
